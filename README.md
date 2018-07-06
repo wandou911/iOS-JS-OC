@@ -82,3 +82,74 @@ function btnClick() {
 ```
 
 ### 2 借助第三方库 推荐[WebViewJavascriptBridge](https://github.com/marcuswestin/WebViewJavascriptBridge)(参考Demo的JSBridge文件夹)
+
+#### native调用javascript
+
+JS中注册要被OC调用的方法
+
+首先在JSBridge.js定义一个全局可用的方法变量
+
+```
+//这部分是固定的
+var iosBridge = function (callback) {
+          if (window.WebViewJavascriptBridge) { return callback(WebViewJavascriptBridge); }
+          if (window.WVJBCallbacks) { return  window.WVJBCallbacks.push(callback); }
+          window.WVJBCallbacks = [callback];
+          var WVJBIframe = document.createElement('iframe');
+          WVJBIframe.style.display = 'none';
+          WVJBIframe.src = 'https://__bridge_loaded__';
+          document.documentElement.appendChild(WVJBIframe);
+          setTimeout(function() {         
+                document.documentElement.removeChild(WVJBIframe) 
+          }, 0)
+ }
+```
+
+- 在`JSBridge.js`中注册提供给`OC`调用的方法。`OC`调用`JS`中的注册方法，`JS`有两种响应方式，分别为：
+   1. `JS`接收到`OC`的调用请求，需要通过回调把一些数据给`OC`的
+   
+   ```
+   /**
+     *方法原型：bridge.registerHandler("handlerName", function(data,responseData) { ... })
+     *@first param: 'OCCallJS', 是OC调用JS的方法名，需要事先注册
+     *@second param: 回调函数，其中data 是OC通过 ‘OCCallJS’ 方法，传过来的值， ’responseCallBack‘ 是JS回调给OC的方法，通过’responseCallBack‘可以给OC传递一个值
+    */
+     bridge.registerHandler('OCCallJS', function(data,responseCallBack){
+            console.log('js is called by oc,data from oc:' + data)
+            document.getElementById('div1').innerText = data + '并准备向JS要一个橘子'
+            responseCallBack('并向JS要一个橘子')
+     })
+   ```
+   
+    2. `JS`接收到`OC`的调用请求，无需回调传值的,分为需要传参，和不需要传参两种，当然你也可以直接把不需要的部分传`nil`
+    
+    ```
+    /**
+     *JS 方法原型：bridge.registerHandler("handlerName", function(responseData) { ... })
+     *@first param: 'OCCallJS', 是OC调用JS的方法名，需要事先注册
+     *@second param: 回调函数，其中data 是OC通过 ‘OCCallJS’ 方法，传过来的值,可能为null
+    */
+    bridge.registerHandler('OCCallJS', function (data){
+              document.getElementById('div1').innerText = data ? data : 'Objective-C主动给JS一个苹果，并且不要回报'
+    })
+    ```
+#### javascript调用native
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
