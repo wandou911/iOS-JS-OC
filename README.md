@@ -7,10 +7,10 @@ iOS JS和OC的相互调用
 
 在原生用加载web界面，在iOS8之后，我们有两种选择，一种是UIKit里的UIWebView，一种是WebKit的WKWebView，其中WKWebView是在iOS8之后才推出的新的web展示控件，目的也很明确，就是为了解决UIWebView加载速度慢，消耗内存高的问题，据说同时加载100个页面，WKWebView内存的消耗量，要比UIWebView少很多。相对而言，如果不支持iOS8之前的版本的话，选择WKWebView可能会更好一点
 
-Demo中含有两种方式，一种不借助三方库，直接用WKWebView，一种是借助三方库。另外，本篇只是讲了一些native和Javascript之间的交互问题，对于WKWebView的使用，会在以后的文章中继续更新
+[Demo](https://github.com/wandou911/WKWebViewDemo.git)中含有两种方式，一种不借助三方库，直接用WKWebView，一种是借助三方库。另外，本篇只是讲了一些native和Javascript之间的交互问题，对于WKWebView的使用，会在以后的文章中继续更新
 
 
-### 1 直接使用WKWebView的相关代理，进行交互（参考demo中的Native文件夹）
+### 1 直接使用WKWebView的相关代理，进行交互（参考[demo](https://github.com/wandou911/WKWebViewDemo.git)中的Native文件夹）
 
 #### native调用javascript
 
@@ -81,7 +81,7 @@ function btnClick() {
 
 ```
 
-### 2 借助第三方库 推荐[WebViewJavascriptBridge](https://github.com/marcuswestin/WebViewJavascriptBridge)(参考Demo的JSBridge文件夹)
+### 2 借助第三方库 推荐[WebViewJavascriptBridge](https://github.com/marcuswestin/WebViewJavascriptBridge)(参考[Demo](https://github.com/wandou911/WKWebViewDemo.git)的JSBridge文件夹)
 
 #### native调用javascript
 
