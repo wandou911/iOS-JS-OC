@@ -85,7 +85,7 @@ function btnClick() {
 
 #### native调用javascript
 
-JS中注册要被OC调用的方法
+1 JS中注册要被OC调用的方法
 
 首先在JSBridge.js定义一个全局可用的方法变量
 
@@ -133,23 +133,100 @@ var iosBridge = function (callback) {
               document.getElementById('div1').innerText = data ? data : 'Objective-C主动给JS一个苹果，并且不要回报'
     })
     ```
+    
+2 OC调用JS中已经注册的方法(OC中调用方法，必须要和JS中注册的方法参数相匹配，否则会报错)
+
+- OC端方法原型有三种：
+
+
+```
+//1
+[bridge callHandler:(NSString*)handlerName data:(id)data responseCallback:(WVJBResponseCallback)callback];
+//2
+[bridge callHandler:(NSString)handlerName data:(id)data
+//3
+ [bridge callHandler:(NSString)handlerName]
+```
+
+1. 针对于`JS`注册方法1
+
+```
+/**注册方法1必须对应`OC`中的方法，如果`OC`没有`callback`，`JS`端会报错.
+     *OC方法原型：[bridge callHandler:(NSString*)handlerName data:(id)data responseCallback:(WVJBResponseCallback)callback]
+     *@first param: 'OCCallJS', 是OC调用的JS方法名
+     *@second param data: 是需要通过OCCallJS方法，传递给JS的数据
+     *@third param responseCallback: JS 收到调用之后，回调给OC的值
+     */
+     [self.bridge callHandler:@"OCCallJS" data:@"Objective-C主动给JS一个苹果" responseCallback:^(id responseData) {
+             NSLog(@"Objective-C给JS一个苹果后，%@",responseData);
+             self.label.text = [NSString stringWithFormat:@"Objective-C给JS一个苹果后，%@",responseData];
+     }];
+```
+
+2. 针对于`JS` 注册方法2
+
+```
+/**
+     *此方法对应OC中下面两个方法
+     *OC方法原型：[bridge callHandler:(NSString*)handlerName data:(id)data] or [bridge callHandler:(NSString*)handlerName]
+     *如果是前者 则对应的JS回调函数data中有值，后者，则为null 
+    */
+    [self.bridge callHandler:@"OCCallJS" data:@"Objective-C主动给JS一个苹果，并且不要回报"]; 
+    或者
+    [self.bridge callHandler:@"OCCallJS"];
+```
+
+
 #### javascript调用native
 
+1 引入头文件
 
+`#import <WebViewJavascriptBridge/WebViewJavascriptBridge.h>`
 
+2 在OC中注册JS需要调用的方法
 
+```
+/**js 调用原生，获取数据,通过回调给JS
+*OC方法原型- (void)registerHandler:(NSString *)handlerName handler:(WVJBHandler)handler
+*@first param handlerName: 'JSCallOC', 是JS调用的OC方法名
+*@second param handler: JS调用OC的回调，包括JS传过来的数据data，和OC给JS回调传值。
+*/
+    [self.bridge registerHandler:@"JSCallOC" handler:^(id data, WVJBResponseCallback responseCallback) {
+        //其中data可能为nil,如果不想在此给JS传值，可responseCallback(nil);
+        self.label.text = [NSString stringWithFormat:@"%@,并准备向Objective-C要一个苹果",data];
+        responseCallback(@"并向Objective-C要了一个苹果");
+    }];
+```
+3 JS 调用在OC中注册过的方法
 
+同样JS调用OC的原型方法，也有三种
 
+```
+//1
+bridge.callHandler("handlerName")
+//2
+bridge.callHandler("handlerName", data) 
+//3
+bridge.callHandler("handlerName", data, function responseCallback(responseData) 
+```
 
+下面的三种方法实例，分别对应上面的三种方法
 
+```
+//1
+ bridge.callHandler('JSCallOC')
+//2
+ bridge.callHandler('JSCallOC','JS主动给Objective-C一个橘子')
+//3,如果OC的注册方法中，有回调函数中有值，则必须采用此方法，否则js会报错
+bridge.callHandler('JSCallOC','JS主动给Objective-C一个橘子',function(responseData){
+          document.getElementById('div1').innerText = 'JS主动给Objective-C一个橘子，' + responseData
+})
+```
 
+### 注意点
 
+1 不管是原生还是用三方库，native需要调用的javascript的方法，貌似必须要在HTML中提前注册,尤其是单页面应用，因为单页面应用只有一个HTML，界面基本上都组件化渲染。
 
-
-
-
-
-
-
+2 javascript调用原生时，同样也需要在调用前，需要先注册。
 
 
